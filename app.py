@@ -5,7 +5,6 @@ from models.InstituicaoEnsino import InstituicaoEnsino
 
 app = Flask(__name__)
 
-
 @app.route("/")
 def index():
     versao = {"path": "/instituicoes"}
@@ -42,12 +41,71 @@ def instituicoesResource():
 
 
 def validarInstituicao(content):
-    return True
+    isValido = True
+    
+    if (len(content['no_regiao']) < 3 or content['no_regiao'].isdigit()):
+        isValido = False
+
+    if (not (content['co_regiao'].isdigit())):
+        isValido = False
+
+    if (len(content['no_uf']) < 3 or content['no_uf'].isdigit()):
+        isValido = False
+
+    if (len(content['sg_uf']) < 2 or content['sg_uf'].isdigit()):
+        isValido = False
+
+    if (not (content['co_uf'].isdigit() )):
+        isValido = False
+
+    if (len(content['no_municipio']) < 3 or content['no_municipio'].isdigit()):
+        isValido = False
+
+    if (not (content['co_municipio'].isdigit())):
+        isValido = False
+
+    if (len(content['no_mesorregiao']) < 3 or content['no_mesorregiao'].isdigit()):
+        isValido = False
+
+    if (not (content['co_mesorregiao'].isdigit())):
+        isValido = False
+
+    if (len(content['no_microrregiao']) < 3 or content['no_microrregiao'].isdigit()):
+        isValido = False
+
+    if (not (content['co_microrregiao'].isdigit())):
+        isValido = False
+
+    if (not (content['qt_mat_bas'].isdigit())):
+        isValido = False
+    
+    if (not (content['qt_mat_inf'].isdigit())):
+        isValido = False
+
+    if (not (content['qt_mat_fund'].isdigit())):
+        isValido = False
+
+    if (not (content['qt_mat_med'].isdigit())):
+        isValido = False
+
+    if (not (content['qt_mat_eja'].isdigit())):
+        isValido = False
+
+    if (not (content['qt_mat_esp'].isdigit())):
+        isValido = False
+
+    return isValido
 
 @app.post("/instituicoes")
 def instituicaoInsercaoResource():
     print("Post - Instituição")
-    instituicaoJson = request.get_json()
+    jsonCliente = request.get_json()
+
+    # colocar em lowercase
+    instituicaoJson = {}
+    for chave, valor in jsonCliente.items():
+        instituicaoJson[chave.lower()] = valor
+
     print(instituicaoJson)
 
     isValido = validarInstituicao(instituicaoJson)
@@ -117,35 +175,21 @@ def instituicaoInsercaoResource():
     return jsonify({"mensagem": "Não cadastrado"}), 406
 
 
-@app.route("/instituicoes/<int:id>", methods=["DELETE"])
-def instituicaoRemocaoResource(id):
-    try:
-        conn = sqlite3.connect('censoescolar.db')
-        cursor = conn.cursor()
-
-        cursor.execute('SELECT * FROM tb_instituicao WHERE id = ?', (id,))
-        row = cursor.fetchone()
-
-        if row is None:
-            return jsonify({"mensagem": "Instituição não encontrada."}), 404
-
-        cursor.execute('DELETE FROM tb_instituicao WHERE id = ?', (id,))
-        conn.commit()
-
-        conn.close()
-
-        return jsonify({"mensagem": "Instituição removida com sucesso."}), 200
-
-    except sqlite3.Error as e:
-        return jsonify({"mensagem": "Erro ao acessar o banco de dados."}), 500
 
 
 @app.route("/instituicoes/<int:id>", methods=["PUT"])
 def instituicaoAtualizacaoResource(id):
     print("Put - Instituição")
-    instituicaoJson = request.get_json()
+    jsonCliente = request.get_json()
 
+    # colocar em lowercase
+    instituicaoJson = {}
+    for chave, valor in jsonCliente.items():
+        instituicaoJson[chave.lower()] = valor
+
+    print(instituicaoJson)
     isValido = validarInstituicao(instituicaoJson)
+    
     if not isValido:
         return jsonify({"mensagem": "Dados inválidos"}), 406
 
@@ -199,6 +243,28 @@ def instituicaoAtualizacaoResource(id):
     finally:
         conn.close()
 
+
+@app.route("/instituicoes/<int:id>", methods=["DELETE"])
+def instituicaoRemocaoResource(id):
+    try:
+        conn = sqlite3.connect('censoescolar.db')
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT * FROM tb_instituicao WHERE id = ?', (id,))
+        row = cursor.fetchone()
+
+        if row is None:
+            return jsonify({"mensagem": "Instituição não encontrada."}), 404
+
+        cursor.execute('DELETE FROM tb_instituicao WHERE id = ?', (id,))
+        conn.commit()
+
+        conn.close()
+
+        return jsonify({"mensagem": "Instituição removida com sucesso."}), 200
+
+    except sqlite3.Error as e:
+        return jsonify({"mensagem": "Erro ao acessar o banco de dados."}), 500
 
 
 @app.route("/instituicoes/<int:id>", methods=["GET"])
