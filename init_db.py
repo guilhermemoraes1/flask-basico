@@ -12,7 +12,7 @@ with open('schemas.sql', encoding='utf-8') as f:
     connection.executescript(f.read())
 
 # 4 - Abrir o arquivo CSV e ler os dados
-with open('pb_pe_rn.csv', newline='', encoding='ISO-8859-1') as csvfile:
+with open('microdados_filtrados.csv', newline='', encoding='ISO-8859-1') as csvfile:
     reader = csv.reader(csvfile)
     
     # Ignorar o cabeçalho do CSV (se houver)
