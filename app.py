@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-ARQUIVO_JSON = 'dados_PB_PE_RN.json'
+ARQUIVO_JSON = 'pb_pe_rn.json'
 
 # Carregando os dados do JSON para memória
 if os.path.exists(ARQUIVO_JSON):
@@ -27,7 +27,7 @@ def instituicoesResource():
 @app.route('/instituicoesensino/<int:co_instituicao>', methods=['GET'])
 def recuperar_instituicao(co_instituicao):
     for instituicao in instituicoes:
-        if instituicao['CO_ENTIDADE'] == co_instituicao:
+        if int(instituicao['CO_ENTIDADE']) == co_instituicao:
             return jsonify(instituicao), 200
     return jsonify({'erro': 'Instituição não encontrada'}), 404
 
@@ -54,7 +54,7 @@ def atualizar_instituicao():
 @app.route('/instituicoesensino/<int:co_instituicao>', methods=['DELETE'])
 def deletar_instituicao(co_instituicao):
     for instituicao in instituicoes:
-        if instituicao['CO_ENTIDADE'] == co_instituicao:
+        if int(instituicao['CO_ENTIDADE']) == co_instituicao:
             instituicoes.remove(instituicao)
             salvar_json()
             return jsonify({'mensagem': 'Instituição removida com sucesso'}), 200
