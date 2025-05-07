@@ -1,65 +1,220 @@
 from flask import Flask, request, jsonify
-import json
-import os
+import sqlite3
+
+from models.InstituicaoEnsino import InstituicaoEnsino
 
 app = Flask(__name__)
 
-ARQUIVO_JSON = 'pb_pe_rn.json'
 
-# Carregando os dados do JSON para memória
-if os.path.exists(ARQUIVO_JSON):
-    with open(ARQUIVO_JSON, 'r', encoding='utf-8') as file:
-        instituicoes = json.load(file)
-
-def salvar_json():
-    with open(ARQUIVO_JSON, 'w', encoding='utf-8') as f:
-        json.dump(instituicoes, f, indent=4, ensure_ascii=False)
-
-@app.route('/')
+@app.route("/")
 def index():
     versao = {"path": "/instituicoes"}
     return jsonify(versao), 200
 
-@app.route('/instituicoesensino', methods=['GET'])
+
+@app.get("/instituicoes")
 def instituicoesResource():
-    return jsonify(instituicoes), 200
+    print("Get - Instituições")
 
-@app.route('/instituicoesensino/<int:co_instituicao>', methods=['GET'])
-def recuperar_instituicao(co_instituicao):
-    for instituicao in instituicoes:
-        if int(instituicao['CO_ENTIDADE']) == co_instituicao:
-            return jsonify(instituicao), 200
-    return jsonify({'erro': 'Instituição não encontrada'}), 404
+    try:
+        instituicoesEnsino = []
 
-@app.route('/instituicoesensino', methods=['POST'])
+        conn = sqlite3.connect('censoescolar.db')
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT * FROM tb_instituicao')
+        resultSet = cursor.fetchall()
+
+        for row in resultSet:
+
+            instituicaoEnsino = InstituicaoEnsino(
+                *row 
+            )
+            instituicoesEnsino.append(instituicaoEnsino.toDict())
+
+
+    except sqlite3.Error as e:
+        return jsonify({"mensagem": "Problema com o banco de dados."}), 500
+    finally:
+        conn.close()
+
+    return jsonify(instituicoesEnsino), 200
+
+
+def validarInstituicao(content):
+    return True
+
+@app.post("/instituicoes")
 def instituicaoInsercaoResource():
-    nova_instituicao = request.get_json()
-    for instituicao in instituicoes:
-        if instituicao['CO_ENTIDADE'] == nova_instituicao.get('co_instituicao'):
-            return jsonify({'erro': 'Instituição já existe'}), 406
-    instituicoes.append(nova_instituicao)
-    salvar_json()
-    return jsonify({'mensagem': 'Instituição adicionada com sucesso'}), 201
+    print("Post - Instituição")
+    instituicaoJson = request.get_json()
+    print(instituicaoJson)
 
-@app.route('/instituicoesensino', methods=['PUT'])
-def atualizar_instituicao():
-    dados_atualizados = request.get_json()
-    for indice, instituicao in enumerate(instituicoes):
-        if instituicao['CO_ENTIDADE'] == dados_atualizados.get('CO_ENTIDADE'):
-            instituicoes[indice] = dados_atualizados
-            salvar_json()
-            return jsonify({'mensagem': 'Instituição atualizada com sucesso'}), 200
-    return jsonify({'erro': 'Instituição não encontrada'}), 404
+    isValido = validarInstituicao(instituicaoJson)
+    if (isValido):
 
-@app.route('/instituicoesensino/<int:co_instituicao>', methods=['DELETE'])
-def deletar_instituicao(co_instituicao):
-    for instituicao in instituicoes:
-        if int(instituicao['CO_ENTIDADE']) == co_instituicao:
-            instituicoes.remove(instituicao)
-            salvar_json()
-            return jsonify({'mensagem': 'Instituição removida com sucesso'}), 200
-    return jsonify({'erro': 'Instituição não encontrada'}), 404
+        no_regiao = instituicaoJson["no_regiao"]
+        co_regiao = int(instituicaoJson["co_regiao"])
+        no_uf = instituicaoJson["no_uf"]
+        sg_uf = instituicaoJson["sg_uf"]
+        co_uf = int(instituicaoJson["co_uf"])
+        no_municipio = instituicaoJson["no_municipio"]
+        co_municipio = int(instituicaoJson["co_municipio"])
+        no_mesorregiao = instituicaoJson["no_mesorregiao"]
+        co_mesorregiao = int(instituicaoJson["co_mesorregiao"])
+        no_microrregiao = instituicaoJson["no_microrregiao"]
+        co_microrregiao = int(instituicaoJson["co_microrregiao"])
+        no_entidade = instituicaoJson["no_entidade"]
+        co_entidade = int(instituicaoJson["co_entidade"])
+        qt_mat_bas = int(instituicaoJson["qt_mat_bas"])
+        qt_mat_inf = int(instituicaoJson["qt_mat_inf"])
+        qt_mat_fund = int(instituicaoJson["qt_mat_fund"])
+        qt_mat_med = int(instituicaoJson["qt_mat_med"])
+        qt_mat_eja = int(instituicaoJson["qt_mat_eja"])
+        qt_mat_esp = int(instituicaoJson["qt_mat_esp"])
 
 
-if __name__ == '__main__':
-    app.run()
+        conn = sqlite3.connect('censoescolar.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+        INSERT INTO tb_instituicao (
+            no_regiao, co_regiao, no_uf, sg_uf, co_uf,
+            no_municipio, co_municipio, no_mesorregiao, co_mesorregiao,
+            no_microrregiao, co_microrregiao, no_entidade, co_entidade,
+            qt_mat_bas, qt_mat_inf, qt_mat_fund, qt_mat_med,
+            qt_mat_eja, qt_mat_esp
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+        instituicaoJson["no_regiao"], int(instituicaoJson["co_regiao"]),
+        instituicaoJson["no_uf"], instituicaoJson["sg_uf"], int(instituicaoJson["co_uf"]),
+        instituicaoJson["no_municipio"], int(instituicaoJson["co_municipio"]),
+        instituicaoJson["no_mesorregiao"], int(instituicaoJson["co_mesorregiao"]),
+        instituicaoJson["no_microrregiao"], int(instituicaoJson["co_microrregiao"]),
+        instituicaoJson["no_entidade"], int(instituicaoJson["co_entidade"]),
+        int(instituicaoJson["qt_mat_bas"]), int(instituicaoJson["qt_mat_inf"]),
+        int(instituicaoJson["qt_mat_fund"]), int(instituicaoJson["qt_mat_med"]),
+        int(instituicaoJson["qt_mat_eja"]), int(instituicaoJson["qt_mat_esp"])
+        ))
+
+        conn.commit()
+
+        id = cursor.lastrowid
+
+        instituicaoEnsino = InstituicaoEnsino(
+            id,
+            no_regiao, co_regiao, no_uf, sg_uf, co_uf,
+            no_municipio, co_municipio, no_mesorregiao, co_mesorregiao,
+            no_microrregiao, co_microrregiao, no_entidade, co_entidade,
+            qt_mat_bas, qt_mat_inf, qt_mat_fund, qt_mat_med,
+            qt_mat_eja, qt_mat_esp
+        )
+
+
+        conn.close()
+
+        return jsonify(instituicaoEnsino.toDict()), 200
+
+    return jsonify({"mensagem": "Não cadastrado"}), 406
+
+
+@app.route("/instituicoes/<int:id>", methods=["DELETE"])
+def instituicaoRemocaoResource(id):
+    try:
+        conn = sqlite3.connect('censoescolar.db')
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT * FROM tb_instituicao WHERE id = ?', (id,))
+        row = cursor.fetchone()
+
+        if row is None:
+            return jsonify({"mensagem": "Instituição não encontrada."}), 404
+
+        cursor.execute('DELETE FROM tb_instituicao WHERE id = ?', (id,))
+        conn.commit()
+
+        conn.close()
+
+        return jsonify({"mensagem": "Instituição removida com sucesso."}), 200
+
+    except sqlite3.Error as e:
+        return jsonify({"mensagem": "Erro ao acessar o banco de dados."}), 500
+
+
+@app.route("/instituicoes/<int:id>", methods=["PUT"])
+def instituicaoAtualizacaoResource(id):
+    print("Put - Instituição")
+    instituicaoJson = request.get_json()
+
+    isValido = validarInstituicao(instituicaoJson)
+    if not isValido:
+        return jsonify({"mensagem": "Dados inválidos"}), 406
+
+    try:
+        conn = sqlite3.connect('censoescolar.db')
+        cursor = conn.cursor()
+
+        cursor.execute('''
+        UPDATE tb_instituicao SET
+            no_regiao = ?, co_regiao = ?, no_uf = ?, sg_uf = ?, co_uf = ?,
+            no_municipio = ?, co_municipio = ?, no_mesorregiao = ?, co_mesorregiao = ?,
+            no_microrregiao = ?, co_microrregiao = ?, no_entidade = ?, co_entidade = ?,
+            qt_mat_bas = ?, qt_mat_inf = ?, qt_mat_fund = ?, qt_mat_med = ?,
+            qt_mat_eja = ?, qt_mat_esp = ?
+        WHERE id = ?
+        ''', (
+            instituicaoJson["no_regiao"], int(instituicaoJson["co_regiao"]),
+            instituicaoJson["no_uf"], instituicaoJson["sg_uf"], int(instituicaoJson["co_uf"]),
+            instituicaoJson["no_municipio"], int(instituicaoJson["co_municipio"]),
+            instituicaoJson["no_mesorregiao"], int(instituicaoJson["co_mesorregiao"]),
+            instituicaoJson["no_microrregiao"], int(instituicaoJson["co_microrregiao"]),
+            instituicaoJson["no_entidade"], int(instituicaoJson["co_entidade"]),
+            int(instituicaoJson["qt_mat_bas"]), int(instituicaoJson["qt_mat_inf"]),
+            int(instituicaoJson["qt_mat_fund"]), int(instituicaoJson["qt_mat_med"]),
+            int(instituicaoJson["qt_mat_eja"]), int(instituicaoJson["qt_mat_esp"]),
+            id
+        ))
+
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({"mensagem": "Instituição não encontrada"}), 404
+
+        instituicaoAtualizada = InstituicaoEnsino(
+            id,
+            instituicaoJson["no_regiao"], int(instituicaoJson["co_regiao"]),
+            instituicaoJson["no_uf"], instituicaoJson["sg_uf"], int(instituicaoJson["co_uf"]),
+            instituicaoJson["no_municipio"], int(instituicaoJson["co_municipio"]),
+            instituicaoJson["no_mesorregiao"], int(instituicaoJson["co_mesorregiao"]),
+            instituicaoJson["no_microrregiao"], int(instituicaoJson["co_microrregiao"]),
+            instituicaoJson["no_entidade"], int(instituicaoJson["co_entidade"]),
+            int(instituicaoJson["qt_mat_bas"]), int(instituicaoJson["qt_mat_inf"]),
+            int(instituicaoJson["qt_mat_fund"]), int(instituicaoJson["qt_mat_med"]),
+            int(instituicaoJson["qt_mat_eja"]), int(instituicaoJson["qt_mat_esp"])
+        )
+
+        return jsonify(instituicaoAtualizada.toDict()), 200
+
+    except sqlite3.Error as e:
+        return jsonify({"mensagem": "Erro no banco de dados"}), 500
+    finally:
+        conn.close()
+
+
+
+@app.route("/instituicoes/<int:id>", methods=["GET"])
+def instituicoesByIdResource(id):
+    try:
+        conn = sqlite3.connect('censoescolar.db')
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT * FROM tb_instituicao WHERE id = ?', (id, ))
+        row = cursor.fetchone()
+        
+        instituicaoEnsino = InstituicaoEnsino(*row)
+
+    except sqlite3.Error as e:
+        return jsonify({"mensagem": "Problema com o banco de dados."}), 500
+    finally:
+        conn.close()
+
+    return jsonify(instituicaoEnsino.toDict()), 200
