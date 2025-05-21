@@ -18,6 +18,7 @@ def getConnection():
     conn = getattr(g, '_database', None)
     if conn is None:
         conn = g._database = sqlite3.connect(DATABASE)
+        conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 class InstituicaoSchema(Schema):
