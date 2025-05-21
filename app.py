@@ -23,16 +23,12 @@ def getConnection():
 class InstituicaoSchema(Schema):
     no_regiao = fields.Str(required=True, error_messages={"required": "Informe o nome da região."})
     co_regiao = fields.Int(required=True, error_messages={"required": "Informe o código da região."})
-    no_uf = fields.Str(required=True, error_messages={"required": "Informe o nome da UF."})
     sg_uf = fields.Str(required=True, error_messages={"required": "Informe a sigla da UF."})
     co_uf = fields.Int(required=True, error_messages={"required": "Informe o código da UF."})
     no_entidade = fields.Str(required=True, error_messages={"required": "Informe o nome da entidade."})
     co_entidade = fields.Int(required=True, error_messages={"required": "Informe o código da entidade."})
-    no_municipio = fields.Str(required=True, error_messages={"required": "Informe o nome do município."})
     co_municipio = fields.Int(required=True, error_messages={"required": "Informe o código do município."})
-    no_mesorregiao = fields.Str(required=True, error_messages={"required": "Informe o nome da mesorregião."})
     co_mesorregiao = fields.Int(required=True, error_messages={"required": "Informe o código da mesorregião."})
-    no_microrregiao = fields.Str(required=True, error_messages={"required": "Informe o nome da microrregião."})
     co_microrregiao = fields.Int(required=True, error_messages={"required": "Informe o código da microrregião."})
     qt_mat_bas = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para educação básica."})
     qt_mat_inf = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para educação infantil."})
@@ -88,16 +84,11 @@ def instituicaoInsercaoResource():
     except ValidationError as err:
         return jsonify({"mensagem": "Erro de validação", "erros": err.messages}), 400
     
-    no_regiao = instituicaoJson["no_regiao"]
     co_regiao = int(instituicaoJson["co_regiao"])
-    no_uf = instituicaoJson["no_uf"]
     sg_uf = instituicaoJson["sg_uf"]
     co_uf = int(instituicaoJson["co_uf"])
-    no_municipio = instituicaoJson["no_municipio"]
     co_municipio = int(instituicaoJson["co_municipio"])
-    no_mesorregiao = instituicaoJson["no_mesorregiao"]
     co_mesorregiao = int(instituicaoJson["co_mesorregiao"])
-    no_microrregiao = instituicaoJson["no_microrregiao"]
     co_microrregiao = int(instituicaoJson["co_microrregiao"])
     no_entidade = instituicaoJson["no_entidade"]
     co_entidade = int(instituicaoJson["co_entidade"])
@@ -113,18 +104,18 @@ def instituicaoInsercaoResource():
     cursor = conn.cursor()
     cursor.execute('''
     INSERT INTO tb_instituicao (
-        no_regiao, co_regiao, no_uf, sg_uf, co_uf,
-        no_municipio, co_municipio, no_mesorregiao, co_mesorregiao,
-        no_microrregiao, co_microrregiao, no_entidade, co_entidade,
+        co_regiao, no_uf, sg_uf, co_uf,
+        co_municipio, co_mesorregiao,
+        co_microrregiao, no_entidade, co_entidade,
         qt_mat_bas, qt_mat_inf, qt_mat_fund, qt_mat_med,
         qt_mat_eja, qt_mat_esp
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
-    instituicaoJson["no_regiao"], int(instituicaoJson["co_regiao"]),
-    instituicaoJson["no_uf"], instituicaoJson["sg_uf"], int(instituicaoJson["co_uf"]),
-    instituicaoJson["no_municipio"], int(instituicaoJson["co_municipio"]),
-    instituicaoJson["no_mesorregiao"], int(instituicaoJson["co_mesorregiao"]),
-    instituicaoJson["no_microrregiao"], int(instituicaoJson["co_microrregiao"]),
+    int(instituicaoJson["co_regiao"]),
+    int(instituicaoJson["co_uf"]),
+    int(instituicaoJson["co_municipio"]),
+    int(instituicaoJson["co_mesorregiao"]),
+    int(instituicaoJson["co_microrregiao"]),
     instituicaoJson["no_entidade"], int(instituicaoJson["co_entidade"]),
     int(instituicaoJson["qt_mat_bas"]), int(instituicaoJson["qt_mat_inf"]),
     int(instituicaoJson["qt_mat_fund"]), int(instituicaoJson["qt_mat_med"]),
@@ -137,9 +128,9 @@ def instituicaoInsercaoResource():
 
     instituicaoEnsino = InstituicaoEnsino(
         id,
-        no_regiao, co_regiao, no_uf, sg_uf, co_uf,
-        no_municipio, co_municipio, no_mesorregiao, co_mesorregiao,
-        no_microrregiao, co_microrregiao, no_entidade, co_entidade,
+        co_regiao, sg_uf, co_uf,
+        co_municipio, co_mesorregiao,
+        co_microrregiao, no_entidade, co_entidade,
         qt_mat_bas, qt_mat_inf, qt_mat_fund, qt_mat_med,
         qt_mat_eja, qt_mat_esp
     )
@@ -184,23 +175,24 @@ def instituicaoAtualizacaoResource(id):
 
         cursor.execute('''
         UPDATE tb_instituicao SET
-            no_regiao = ?, co_regiao = ?, no_uf = ?, sg_uf = ?, co_uf = ?,
-            no_municipio = ?, co_municipio = ?, no_mesorregiao = ?, co_mesorregiao = ?,
-            no_microrregiao = ?, co_microrregiao = ?, no_entidade = ?, co_entidade = ?,
+            co_regiao = ?, sg_uf = ?, co_uf = ?,
+            co_municipio = ?, co_mesorregiao = ?,
+            co_microrregiao = ?, no_entidade = ?, co_entidade = ?,
             qt_mat_bas = ?, qt_mat_inf = ?, qt_mat_fund = ?, qt_mat_med = ?,
             qt_mat_eja = ?, qt_mat_esp = ?
         WHERE id = ?
         ''', (
-            instituicaoJson["no_regiao"], int(instituicaoJson["co_regiao"]),
-            instituicaoJson["no_uf"], instituicaoJson["sg_uf"], int(instituicaoJson["co_uf"]),
-            instituicaoJson["no_municipio"], int(instituicaoJson["co_municipio"]),
-            instituicaoJson["no_mesorregiao"], int(instituicaoJson["co_mesorregiao"]),
-            instituicaoJson["no_microrregiao"], int(instituicaoJson["co_microrregiao"]),
+            id,
+            int(instituicaoJson["co_regiao"]),
+            int(instituicaoJson["co_uf"]),
+            int(instituicaoJson["co_municipio"]),
+            int(instituicaoJson["co_mesorregiao"]),
+            int(instituicaoJson["co_microrregiao"]),
             instituicaoJson["no_entidade"], int(instituicaoJson["co_entidade"]),
             int(instituicaoJson["qt_mat_bas"]), int(instituicaoJson["qt_mat_inf"]),
             int(instituicaoJson["qt_mat_fund"]), int(instituicaoJson["qt_mat_med"]),
-            int(instituicaoJson["qt_mat_eja"]), int(instituicaoJson["qt_mat_esp"]),
-            id
+            int(instituicaoJson["qt_mat_eja"]), int(instituicaoJson["qt_mat_esp"])
+            
         ))
 
         conn.commit()
@@ -210,11 +202,11 @@ def instituicaoAtualizacaoResource(id):
 
         instituicaoAtualizada = InstituicaoEnsino(
             id,
-            instituicaoJson["no_regiao"], int(instituicaoJson["co_regiao"]),
-            instituicaoJson["no_uf"], instituicaoJson["sg_uf"], int(instituicaoJson["co_uf"]),
-            instituicaoJson["no_municipio"], int(instituicaoJson["co_municipio"]),
-            instituicaoJson["no_mesorregiao"], int(instituicaoJson["co_mesorregiao"]),
-            instituicaoJson["no_microrregiao"], int(instituicaoJson["co_microrregiao"]),
+            int(instituicaoJson["co_regiao"]),
+            int(instituicaoJson["co_uf"]),
+            int(instituicaoJson["co_municipio"]),
+            int(instituicaoJson["co_mesorregiao"]),
+            int(instituicaoJson["co_microrregiao"]),
             instituicaoJson["no_entidade"], int(instituicaoJson["co_entidade"]),
             int(instituicaoJson["qt_mat_bas"]), int(instituicaoJson["qt_mat_inf"]),
             int(instituicaoJson["qt_mat_fund"]), int(instituicaoJson["qt_mat_med"]),
