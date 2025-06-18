@@ -1,21 +1,31 @@
-import sqlite3
+import psycopg2
 import csv
 
-# 1 - Abrir a conexão
-connection = sqlite3.connect('censoescolar.db')
+def converter_inteiro(value):
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return None  
 
-# 2 - Criar o cursor
+# 1 - Abrir a conexão
+connection = psycopg2.connect(
+    host="localhost",
+    port=5432,
+    database="censoescolar",
+    user="postgres",
+    password="1234"
+)
 cursor = connection.cursor()
 
 # 3 - Executar o schema
 with open('schemas/institutos.sql', encoding='utf-8') as f:
-    connection.executescript(f.read())
+    cursor.execute(f.read())
+connection.commit()
 
 # 4 - Abrir o arquivo CSV e ler os dados
-with open('pb_pe_rn.csv', newline='', encoding='ISO-8859-1') as csvfile:
+with open('microdados_filtrados.csv', newline='', encoding='ISO-8859-1') as csvfile:
     reader = csv.DictReader(csvfile)
 
-    # Campos esperados pela tabela, na ordem correta
     campos_esperados = [
         'CO_REGIAO', 'SG_UF', 'CO_UF',
         'CO_MUNICIPIO', 'CO_MESORREGIAO',
@@ -24,11 +34,26 @@ with open('pb_pe_rn.csv', newline='', encoding='ISO-8859-1') as csvfile:
         'QT_MAT_EJA', 'QT_MAT_ESP'
     ]
 
-
-    # 5 - Inserir dados no banco de dados
     for row in reader:
         try:
-            valores = tuple(row[campo] for campo in campos_esperados)
+            # Converta os campos inteiros antes
+            valores = (
+                converter_inteiro(row['CO_REGIAO']),
+                row['SG_UF'],
+                converter_inteiro(row['CO_UF']),
+                converter_inteiro(row['CO_MUNICIPIO']),
+                converter_inteiro(row['CO_MESORREGIAO']),
+                converter_inteiro(row['CO_MICRORREGIAO']),
+                row['NO_ENTIDADE'],
+                row['CO_ENTIDADE'],
+                converter_inteiro(row['QT_MAT_BAS']),
+                converter_inteiro(row['QT_MAT_INF']),
+                converter_inteiro(row['QT_MAT_FUND']),
+                converter_inteiro(row['QT_MAT_MED']),
+                converter_inteiro(row['QT_MAT_EJA']),
+                converter_inteiro(row['QT_MAT_ESP']),
+            )
+
             cursor.execute('''
                 INSERT INTO tb_instituicao (
                     co_regiao, sg_uf, co_uf,
@@ -36,15 +61,15 @@ with open('pb_pe_rn.csv', newline='', encoding='ISO-8859-1') as csvfile:
                     co_microrregiao, no_entidade, co_entidade,
                     qt_mat_bas, qt_mat_inf, qt_mat_fund, qt_mat_med,
                     qt_mat_eja, qt_mat_esp
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ''', valores)
+
         except KeyError as e:
             print(f"Coluna ausente no CSV: {e}")
+            connection.rollback()
         except Exception as e:
             print(f"Erro ao inserir linha: {e}")
+            connection.rollback()
 
-# 6 - Commit
 connection.commit()
-
-# 7 - Fechar a conexão
 connection.close()

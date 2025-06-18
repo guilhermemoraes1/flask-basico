@@ -1,18 +1,17 @@
 DROP TABLE IF EXISTS tb_instituicao;
 
-
 CREATE TABLE IF NOT EXISTS tb_instituicao (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    co_regiao TEXT,
+    id SERIAL PRIMARY KEY,
+    co_regiao INTEGER,
     no_regiao TEXT,
-    co_uf TEXT,
+    co_uf INTEGER,
     sg_uf TEXT,
     no_uf TEXT,
-    co_municipio TEXT,
+    co_municipio INTEGER,
     no_municipio TEXT,
-    co_mesorregiao TEXT,
+    co_mesorregiao INTEGER,
     no_mesorregiao TEXT,
-    co_microrregiao TEXT,
+    co_microrregiao INTEGER,
     no_microrregiao TEXT,
     no_entidade TEXT,
     co_entidade TEXT,
@@ -22,8 +21,6 @@ CREATE TABLE IF NOT EXISTS tb_instituicao (
     qt_mat_med INTEGER,
     qt_mat_eja INTEGER,
     qt_mat_esp INTEGER,
-    FOREIGN KEY (co_uf) REFERENCES tb_municipio(co_uf),
-    FOREIGN KEY (co_municipio) REFERENCES tb_municipio(co_municipio),
-    FOREIGN KEY (co_mesorregiao) REFERENCES tb_municipio(co_mesorregiao),
-    FOREIGN KEY (co_microrregiao) REFERENCES tb_municipio(co_microrregiao)
+    FOREIGN KEY (co_uf) REFERENCES tb_estado(co_uf),
+    FOREIGN KEY (co_municipio) REFERENCES tb_municipio(co_municipio)
 );

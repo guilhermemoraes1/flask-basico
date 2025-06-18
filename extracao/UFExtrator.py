@@ -1,15 +1,20 @@
-import sqlite3
+import psycopg2
 import requests
 
 # 1 - Abrir a conexão
-connection = sqlite3.connect('censoescolar.db')
+connection = psycopg2.connect(
+        host="localhost",
+        port=5432,
+        database="censoescolar",
+        user="postgres",
+        password="1234")
 
 # 2 - Criar o cursor
 cursor = connection.cursor()
 
 # 3 - Executar o schema
 with open('schemas/estados.sql', encoding='utf-8') as f:
-    connection.executescript(f.read())
+    cursor.execute(f.read())
 
 # 4 - Requisição à API do IBGE
 url = "https://servicodados.ibge.gov.br/api/v1/localidades/estados"
@@ -27,10 +32,10 @@ if response.status_code == 200:
             no_regiao = estado["regiao"]["nome"]
 
             cursor.execute('''
-                INSERT OR REPLACE INTO tb_estado (
+                INSERT INTO tb_estado (
                     co_uf, sg_uf, no_uf,
                     co_regiao, no_regiao
-                ) VALUES (?, ?, ?, ?, ?, ?)
+                ) VALUES (%s, %s, %s, %s, %s)
             ''', (co_uf, sg_uf, no_uf, co_regiao, no_regiao))
 
         except KeyError as e:

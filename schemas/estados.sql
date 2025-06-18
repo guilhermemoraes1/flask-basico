@@ -5,6 +5,5 @@ CREATE TABLE IF NOT EXISTS tb_estado (
     sg_uf TEXT,
     no_uf TEXT,
     co_regiao INTEGER,
-    sg_regiao TEXT,
     no_regiao TEXT
 );

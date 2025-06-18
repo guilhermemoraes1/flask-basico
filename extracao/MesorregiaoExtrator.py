@@ -1,13 +1,20 @@
-import sqlite3
+import psycopg2
 import requests
 
-# 1 - Conectar ao banco
-connection = sqlite3.connect('censoescolar.db')
+# 1 - Abrir a conexão
+connection = psycopg2.connect(
+        host="localhost",
+        port=5432,
+        database="censoescolar",
+        user="postgres",
+        password="1234")
+
+# 2 - Criar o cursor
 cursor = connection.cursor()
 
-# 2 - Criar a tabela (se necessário)
+# 3 - Executar o schema
 with open('schemas/mesorregioes.sql', encoding='utf-8') as f:
-    connection.executescript(f.read())
+    cursor.execute(f.read())
 
 # 3 - Buscar os dados da API
 url = "https://servicodados.ibge.gov.br/api/v1/localidades/mesorregioes"
@@ -32,11 +39,11 @@ if response.status_code == 200:
             no_regiao = regiao["nome"]
 
             cursor.execute('''
-                INSERT OR REPLACE INTO tb_mesorregiao (
+                INSERT INTO tb_mesorregiao (
                     co_mesorregiao, no_mesorregiao,
                     co_uf, sg_uf, no_uf,
                     co_regiao, sg_regiao, no_regiao
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             ''', (
                 co_mesorregiao, no_mesorregiao,
                 co_uf, sg_uf, no_uf,
