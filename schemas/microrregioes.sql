@@ -1,9 +1,7 @@
-DROP TABLE IF EXISTS tb_microrregiao;
+DROP TABLE IF EXISTS tb_mesorregiao;
 
-CREATE TABLE IF NOT EXISTS tb_microrregiao (
-    co_microrregiao INTEGER PRIMARY KEY,
-    no_microrregiao TEXT,
-    co_mesorregiao INTEGER,
+CREATE TABLE IF NOT EXISTS tb_mesorregiao (
+    co_mesorregiao INTEGER PRIMARY KEY,
     no_mesorregiao TEXT,
     co_uf INTEGER,
     sg_uf TEXT,
