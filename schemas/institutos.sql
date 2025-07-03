@@ -20,7 +20,5 @@ CREATE TABLE IF NOT EXISTS tb_instituicao (
     qt_mat_fund INTEGER,
     qt_mat_med INTEGER,
     qt_mat_eja INTEGER,
-    qt_mat_esp INTEGER,
-    FOREIGN KEY (co_uf) REFERENCES tb_estado(co_uf),
-    FOREIGN KEY (co_municipio) REFERENCES tb_municipio(co_municipio)
+    qt_mat_esp INTEGER
 );

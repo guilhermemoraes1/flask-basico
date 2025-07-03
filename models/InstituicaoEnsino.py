@@ -1,3 +1,5 @@
+from marshmallow import Schema, fields, validate
+
 class InstituicaoEnsino:
     def __init__(
         self, id, no_regiao, co_regiao, no_uf, sg_uf, co_uf,
@@ -50,3 +52,21 @@ class InstituicaoEnsino:
             "qt_mat_eja": self.qt_mat_eja,
             "qt_mat_esp": self.qt_mat_esp
         }
+
+class InstituicaoSchema(Schema):
+    no_regiao = fields.Str(required=True, error_messages={"required": "Informe o nome da região."})
+    co_regiao = fields.Int(required=True, error_messages={"required": "Informe o código da região."})
+    sg_uf = fields.Str(required=True, error_messages={"required": "Informe a sigla da UF."})
+    co_uf = fields.Int(required=True, error_messages={"required": "Informe o código da UF."})
+    no_entidade = fields.Str(required=True, error_messages={"required": "Informe o nome da entidade."})
+    co_entidade = fields.Int(required=True, error_messages={"required": "Informe o código da entidade."})
+    co_municipio = fields.Int(required=True, error_messages={"required": "Informe o código do município."})
+    co_mesorregiao = fields.Int(required=True, error_messages={"required": "Informe o código da mesorregião."})
+    co_microrregiao = fields.Int(required=True, error_messages={"required": "Informe o código da microrregião."})
+    qt_mat_bas = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para educação básica."})
+    qt_mat_inf = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para educação infantil."})
+    qt_mat_fund = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para ensino fundamental."})
+    qt_mat_med = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para ensino médio."})
+    qt_mat_eja = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para EJA."})
+    qt_mat_esp = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para educação especial."})
+

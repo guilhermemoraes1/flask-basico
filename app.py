@@ -1,54 +1,24 @@
-from flask import Flask, request, jsonify, g
+from flask import request, jsonify, g
 import sqlite3
-from marshmallow import Schema, fields, ValidationError
+from marshmallow import ValidationError
+
+from helpers.application import app
+from helpers.database import getConnection
+from helpers.logging import logger
+from helpers.CORS import cors
 
 from models.InstituicaoEnsino import InstituicaoEnsino
 
-app = Flask(__name__)
-
-DATABASE = 'censoescolar.db'
-
-@app.teardown_appcontext
-def close_connection(exception):
-    conn = getattr(g, '_database', None)
-    if conn is not None:
-        conn.close()
-
-def getConnection():
-    conn = getattr(g, '_database', None)
-    if conn is None:
-        conn = g._database = sqlite3.connect(DATABASE)
-        conn.execute("PRAGMA foreign_keys = ON")
-    return conn
-
-class InstituicaoSchema(Schema):
-    no_regiao = fields.Str(required=True, error_messages={"required": "Informe o nome da região."})
-    co_regiao = fields.Int(required=True, error_messages={"required": "Informe o código da região."})
-    sg_uf = fields.Str(required=True, error_messages={"required": "Informe a sigla da UF."})
-    co_uf = fields.Int(required=True, error_messages={"required": "Informe o código da UF."})
-    no_entidade = fields.Str(required=True, error_messages={"required": "Informe o nome da entidade."})
-    co_entidade = fields.Int(required=True, error_messages={"required": "Informe o código da entidade."})
-    co_municipio = fields.Int(required=True, error_messages={"required": "Informe o código do município."})
-    co_mesorregiao = fields.Int(required=True, error_messages={"required": "Informe o código da mesorregião."})
-    co_microrregiao = fields.Int(required=True, error_messages={"required": "Informe o código da microrregião."})
-    qt_mat_bas = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para educação básica."})
-    qt_mat_inf = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para educação infantil."})
-    qt_mat_fund = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para ensino fundamental."})
-    qt_mat_med = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para ensino médio."})
-    qt_mat_eja = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para EJA."})
-    qt_mat_esp = fields.Int(allow_none=True, error_messages={"invalid": "Quantidade inválida para educação especial."})
-
-
+cors.init_app(app)
 
 @app.route("/")
 def index():
     versao = {"path": "/instituicoes"}
     return jsonify(versao), 200
 
-
 @app.get("/instituicoes")
 def instituicoesResource():
-    print("Get - Instituições")
+    logger.info("Get - Instituições")
 
     try:
         instituicoesEnsino = []
@@ -71,73 +41,11 @@ def instituicoesResource():
     return jsonify(instituicoesEnsino), 200
 
 
-def validarInstituicao(content):
-    isValido = True
-    
-    if (len(content['no_regiao']) < 3 or content['no_regiao'].isdigit()):
-        isValido = False
-
-    if (not (content['co_regiao'].isdigit())):
-        isValido = False
-
-    if (len(content['no_uf']) < 3 or content['no_uf'].isdigit()):
-        isValido = False
-
-    if (len(content['sg_uf']) < 2 or content['sg_uf'].isdigit()):
-        isValido = False
-
-    if (not (content['co_uf'].isdigit() )):
-        isValido = False
-
-    if (len(content['no_municipio']) < 3 or content['no_municipio'].isdigit()):
-        isValido = False
-
-    if (not (content['co_municipio'].isdigit())):
-        isValido = False
-
-    if (len(content['no_mesorregiao']) < 3 or content['no_mesorregiao'].isdigit()):
-        isValido = False
-
-    if (not (content['co_mesorregiao'].isdigit())):
-        isValido = False
-
-    if (len(content['no_microrregiao']) < 3 or content['no_microrregiao'].isdigit()):
-        isValido = False
-
-    if (not (content['co_microrregiao'].isdigit())):
-        isValido = False
-
-    if (not (content['qt_mat_bas'].isdigit())):
-        isValido = False
-    
-    if (not (content['qt_mat_inf'].isdigit())):
-        isValido = False
-
-    if (not (content['qt_mat_fund'].isdigit())):
-        isValido = False
-
-    if (not (content['qt_mat_med'].isdigit())):
-        isValido = False
-
-    if (not (content['qt_mat_eja'].isdigit())):
-        isValido = False
-
-    if (not (content['qt_mat_esp'].isdigit())):
-        isValido = False
-
-    return isValido
-
 @app.post("/instituicoes")
 def instituicaoInsercaoResource():
-    print("Post - Instituição")
-    instituicaoData = request.get_json()
-    schema = InstituicaoSchema()
+    logger.info("Post - Instituições")
+    instituicaoJson = request.get_json()
 
-    try:
-        instituicaoJson = schema.load(instituicaoData) 
-    except ValidationError as err:
-        return jsonify({"mensagem": "Erro de validação", "erros": err.messages}), 400
-    
     co_regiao = int(instituicaoJson["co_regiao"])
     sg_uf = instituicaoJson["sg_uf"]
     co_uf = int(instituicaoJson["co_uf"])
@@ -216,20 +124,14 @@ def instituicaoRemocaoResource(id):
 
 @app.route("/instituicoes/<int:id>", methods=["PUT"])
 def instituicaoAtualizacaoResource(id):
-    print("Put - Instituição")
+    logger.info("Put - Instituições")
     jsonCliente = request.get_json()
 
     # colocar em lowercase
     instituicaoJson = {}
     for chave, valor in jsonCliente.items():
         instituicaoJson[chave.lower()] = valor
-
-    print(instituicaoJson)
-    isValido = validarInstituicao(instituicaoJson)
-    
-    if not isValido:
-        return jsonify({"mensagem": "Dados inválidos"}), 406
-
+        
     try:
         conn = getConnection()
         cursor = conn.cursor()

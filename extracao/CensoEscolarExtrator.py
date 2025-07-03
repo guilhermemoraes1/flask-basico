@@ -27,25 +27,32 @@ with open('microdados_filtrados.csv', newline='', encoding='ISO-8859-1') as csvf
     reader = csv.DictReader(csvfile)
 
     campos_esperados = [
-        'CO_REGIAO', 'SG_UF', 'CO_UF',
-        'CO_MUNICIPIO', 'CO_MESORREGIAO',
-        'CO_MICRORREGIAO', 'NO_ENTIDADE', 'CO_ENTIDADE',
-        'QT_MAT_BAS', 'QT_MAT_INF', 'QT_MAT_FUND', 'QT_MAT_MED',
-        'QT_MAT_EJA', 'QT_MAT_ESP'
+        'NO_REGIAO', 'CO_REGIAO',
+        'NO_UF', 'SG_UF', 'CO_UF',
+        'NO_MUNICIPIO', 'CO_MUNICIPIO',
+        'NO_MESORREGIAO', 'CO_MESORREGIAO',
+        'NO_MICRORREGIAO', 'CO_MICRORREGIAO',
+        'NO_ENTIDADE', 'CO_ENTIDADE',
+        'QT_MAT_BAS', 'QT_MAT_INF', 'QT_MAT_FUND',
+        'QT_MAT_MED', 'QT_MAT_EJA', 'QT_MAT_ESP'
     ]
 
     for row in reader:
         try:
-            # Converta os campos inteiros antes
             valores = (
+                row['NO_REGIAO'],
                 converter_inteiro(row['CO_REGIAO']),
+                row['NO_UF'],
                 row['SG_UF'],
                 converter_inteiro(row['CO_UF']),
+                row['NO_MUNICIPIO'],
                 converter_inteiro(row['CO_MUNICIPIO']),
+                row['NO_MESORREGIAO'],
                 converter_inteiro(row['CO_MESORREGIAO']),
+                row['NO_MICRORREGIAO'],
                 converter_inteiro(row['CO_MICRORREGIAO']),
                 row['NO_ENTIDADE'],
-                row['CO_ENTIDADE'],
+                converter_inteiro(row['CO_ENTIDADE']),  # <- corrigido aqui
                 converter_inteiro(row['QT_MAT_BAS']),
                 converter_inteiro(row['QT_MAT_INF']),
                 converter_inteiro(row['QT_MAT_FUND']),
@@ -54,14 +61,18 @@ with open('microdados_filtrados.csv', newline='', encoding='ISO-8859-1') as csvf
                 converter_inteiro(row['QT_MAT_ESP']),
             )
 
+
             cursor.execute('''
                 INSERT INTO tb_instituicao (
-                    co_regiao, sg_uf, co_uf,
-                    co_municipio, co_mesorregiao,
-                    co_microrregiao, no_entidade, co_entidade,
-                    qt_mat_bas, qt_mat_inf, qt_mat_fund, qt_mat_med,
-                    qt_mat_eja, qt_mat_esp
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    no_regiao, co_regiao,
+                    no_uf, sg_uf, co_uf,
+                    no_municipio, co_municipio,
+                    no_mesorregiao, co_mesorregiao,
+                    no_microrregiao, co_microrregiao,
+                    no_entidade, co_entidade,
+                    qt_mat_bas, qt_mat_inf, qt_mat_fund,
+                    qt_mat_med, qt_mat_eja, qt_mat_esp
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ''', valores)
 
         except KeyError as e:
