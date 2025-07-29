@@ -34,8 +34,9 @@ def dados_por_estado_2023():
         SELECT 
           SG_UF,
           SUM(QT_MAT_BAS) AS mat_bas
-        FROM tb_instituicao_2023
-        GROUP BY SG_UF;
+        FROM tb_instituicao
+        WHERE ano = 2023
+        GROUP BY SG_UF ;
     """)
     rows = cur.fetchall()
     colnames = [desc[0] for desc in cur.description]
@@ -52,7 +53,8 @@ def dados_por_estado_2024():
         SELECT 
           SG_UF,
           SUM(QT_MAT_BAS) AS mat_bas
-        FROM tb_instituicao_2024
+        FROM tb_instituicao
+        WHERE ano = 2024
         GROUP BY SG_UF;
     """)
     rows = cur.fetchall()
@@ -71,23 +73,16 @@ def dados_por_municipio_2024():
 
     if uf:
         cur.execute("""
-            SELECT 
-                CO_MUNICIPIO,
-                NO_MUNICIPIO,
-                SG_UF,
-                SUM(QT_MAT_BAS) AS mat_bas
-            FROM tb_instituicao_2024
-            WHERE SG_UF = %s
+            SELECT CO_MUNICIPIO, NO_MUNICIPIO, SG_UF, SUM(QT_MAT_BAS) AS mat_bas
+            FROM tb_instituicao
+            WHERE SG_UF = %s AND ano = 2024
             GROUP BY CO_MUNICIPIO, NO_MUNICIPIO, SG_UF;
         """, (uf,))
     else:
         cur.execute("""
-            SELECT 
-                CO_MUNICIPIO,
-                NO_MUNICIPIO,
-                SG_UF,
-                SUM(QT_MAT_BAS) AS mat_bas
-            FROM tb_instituicao_2024
+            SELECT CO_MUNICIPIO, NO_MUNICIPIO, SG_UF, SUM(QT_MAT_BAS) AS mat_bas
+            FROM tb_instituicao
+            WHERE ano = 2024
             GROUP BY CO_MUNICIPIO, NO_MUNICIPIO, SG_UF;
         """)
 
@@ -107,23 +102,16 @@ def dados_por_municipio_2023():
 
     if uf:
         cur.execute("""
-            SELECT 
-                CO_MUNICIPIO,
-                NO_MUNICIPIO,
-                SG_UF,
-                SUM(QT_MAT_BAS) AS mat_bas
-            FROM tb_instituicao_2023
-            WHERE SG_UF = %s
+            SELECT CO_MUNICIPIO, NO_MUNICIPIO, SG_UF, SUM(QT_MAT_BAS) AS mat_bas
+            FROM tb_instituicao
+            WHERE SG_UF = %s AND ano = 2023
             GROUP BY CO_MUNICIPIO, NO_MUNICIPIO, SG_UF;
         """, (uf,))
     else:
         cur.execute("""
-            SELECT 
-                CO_MUNICIPIO,
-                NO_MUNICIPIO,
-                SG_UF,
-                SUM(QT_MAT_BAS) AS mat_bas
-            FROM tb_instituicao_2023
+            SELECT CO_MUNICIPIO, NO_MUNICIPIO, SG_UF, SUM(QT_MAT_BAS) AS mat_bas
+            FROM tb_instituicao
+            WHERE ano = 2023
             GROUP BY CO_MUNICIPIO, NO_MUNICIPIO, SG_UF;
         """)
 

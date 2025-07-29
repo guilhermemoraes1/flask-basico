@@ -1,4 +1,5 @@
 import psycopg2
+import os
 import csv
 
 def converter_inteiro(value):
@@ -18,13 +19,15 @@ connection = psycopg2.connect(
 )
 cursor = connection.cursor()
 
-# 3 - Executar o schema
-with open('schemas/institutos.sql', encoding='utf-8') as f:
+sql_path = os.path.join(os.path.dirname(__file__), '..', 'schemas', 'institutos.sql')
+
+with open(sql_path, encoding='utf-8') as f:
     cursor.execute(f.read())
 connection.commit()
 
-# 4 - Abrir o arquivo CSV e ler os dados
-with open('dados_ed_2024.csv', newline='', encoding='ISO-8859-1') as csvfile:
+csv_path = os.path.join(os.path.dirname(__file__), '..', '..', 'dados_ed_2023.csv')
+
+with open(csv_path, newline='', encoding='ISO-8859-1') as csvfile:
     reader = csv.DictReader(csvfile)
 
     campos_esperados = [
@@ -63,12 +66,13 @@ with open('dados_ed_2024.csv', newline='', encoding='ISO-8859-1') as csvfile:
                 converter_inteiro(row['QT_MAT_MED']),
                 converter_inteiro(row['QT_MAT_EJA']),
                 converter_inteiro(row['QT_MAT_ESP']),
+                2023
             )
             batch.append(valores)
 
             if len(batch) >= batch_size:
                 cursor.executemany('''
-                    INSERT INTO tb_instituicao_2024 (
+                    INSERT INTO tb_instituicao (
                         no_regiao, co_regiao,
                         no_uf, sg_uf, co_uf,
                         no_municipio, co_municipio,
@@ -76,8 +80,8 @@ with open('dados_ed_2024.csv', newline='', encoding='ISO-8859-1') as csvfile:
                         no_microrregiao, co_microrregiao,
                         no_entidade, co_entidade,
                         qt_mat_bas, qt_mat_inf, qt_mat_fund,
-                        qt_mat_med, qt_mat_eja, qt_mat_esp
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        qt_mat_med, qt_mat_eja, qt_mat_esp, ano
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ''', batch)
                 connection.commit()
                 batch = []
@@ -92,7 +96,7 @@ with open('dados_ed_2024.csv', newline='', encoding='ISO-8859-1') as csvfile:
     # Executa o restante do batch
     if batch:
         cursor.executemany('''
-            INSERT INTO tb_instituicao_2024 (
+            INSERT INTO tb_instituicao (
                 no_regiao, co_regiao,
                 no_uf, sg_uf, co_uf,
                 no_municipio, co_municipio,
@@ -100,8 +104,8 @@ with open('dados_ed_2024.csv', newline='', encoding='ISO-8859-1') as csvfile:
                 no_microrregiao, co_microrregiao,
                 no_entidade, co_entidade,
                 qt_mat_bas, qt_mat_inf, qt_mat_fund,
-                qt_mat_med, qt_mat_eja, qt_mat_esp
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                qt_mat_med, qt_mat_eja, qt_mat_esp, ano
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', batch)
         connection.commit()
 

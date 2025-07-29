@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS tb_instituicao_2024;
+DROP TABLE IF EXISTS tb_instituicao;
 
-CREATE TABLE IF NOT EXISTS tb_instituicao_2024 (
+CREATE TABLE IF NOT EXISTS tb_instituicao (
     id SERIAL PRIMARY KEY,
     co_regiao INTEGER,
     no_regiao TEXT,
@@ -20,5 +20,6 @@ CREATE TABLE IF NOT EXISTS tb_instituicao_2024 (
     qt_mat_fund INTEGER,
     qt_mat_med INTEGER,
     qt_mat_eja INTEGER,
-    qt_mat_esp INTEGER
+    qt_mat_esp INTEGER,
+    ano INTEGER
 );
