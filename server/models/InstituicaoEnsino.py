@@ -1,14 +1,37 @@
-from marshmallow import Schema, fields, validate
+from sqlalchemy import Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
+from marshmallow import Schema, fields
+from helpers.database import db
 
-class InstituicaoEnsino:
-    def __init__(
-        self, id, no_regiao, co_regiao, no_uf, sg_uf, co_uf,
-        no_municipio, co_municipio, no_mesorregiao, co_mesorregiao,
-        no_microrregiao, co_microrregiao, no_entidade, co_entidade,
-        qt_mat_bas, qt_mat_inf, qt_mat_fund, qt_mat_med,
-        qt_mat_eja, qt_mat_esp
-    ):
-        self.id = id
+class InstituicaoEnsino(db.Model):
+    __tablename__ = "tb_instituicao"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    no_regiao: Mapped[str] = mapped_column(String)
+    co_regiao: Mapped[int] = mapped_column(Integer)
+    no_uf: Mapped[str] = mapped_column(String)
+    sg_uf: Mapped[str] = mapped_column(String)
+    co_uf: Mapped[int] = mapped_column(Integer)
+    no_municipio: Mapped[str] = mapped_column(String)
+    co_municipio: Mapped[int] = mapped_column(Integer)
+    no_mesorregiao: Mapped[str] = mapped_column(String)
+    co_mesorregiao: Mapped[int] = mapped_column(Integer)
+    no_microrregiao: Mapped[str] = mapped_column(String)
+    co_microrregiao: Mapped[int] = mapped_column(Integer)
+    no_entidade: Mapped[str] = mapped_column(String)
+    co_entidade: Mapped[int] = mapped_column(Integer)
+    qt_mat_bas: Mapped[int] = mapped_column(Integer, nullable=True)
+    qt_mat_inf: Mapped[int] = mapped_column(Integer, nullable=True)
+    qt_mat_fund: Mapped[int] = mapped_column(Integer, nullable=True)
+    qt_mat_med: Mapped[int] = mapped_column(Integer, nullable=True)
+    qt_mat_eja: Mapped[int] = mapped_column(Integer, nullable=True)
+    qt_mat_esp: Mapped[int] = mapped_column(Integer, nullable=True)
+    ano = db.Column(db.Integer)
+
+    def __init__(self, no_regiao, co_regiao, no_uf, sg_uf, co_uf, no_municipio, co_municipio, 
+                 no_mesorregiao, co_mesorregiao, no_microrregiao, co_microrregiao, 
+                 no_entidade, co_entidade, qt_mat_bas, qt_mat_inf, qt_mat_fund, 
+                 qt_mat_med, qt_mat_eja, qt_mat_esp, ano):
         self.no_regiao = no_regiao
         self.co_regiao = co_regiao
         self.no_uf = no_uf
@@ -28,6 +51,7 @@ class InstituicaoEnsino:
         self.qt_mat_med = qt_mat_med
         self.qt_mat_eja = qt_mat_eja
         self.qt_mat_esp = qt_mat_esp
+        self.ano = ano
 
     def toDict(self):
         return {
@@ -50,10 +74,15 @@ class InstituicaoEnsino:
             "qt_mat_fund": self.qt_mat_fund,
             "qt_mat_med": self.qt_mat_med,
             "qt_mat_eja": self.qt_mat_eja,
-            "qt_mat_esp": self.qt_mat_esp
+            "qt_mat_esp": self.qt_mat_esp,
+            "ano": self.ano  
         }
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(id={self.id!r}, no_entidade={self.no_entidade!r})"
+
 class InstituicaoSchema(Schema):
+    id = fields.Int(dump_only=True)
     no_regiao = fields.Str(required=True, error_messages={"required": "Informe o nome da região."})
     co_regiao = fields.Int(required=True, error_messages={"required": "Informe o código da região."})
     sg_uf = fields.Str(required=True, error_messages={"required": "Informe a sigla da UF."})

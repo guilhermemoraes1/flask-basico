@@ -8,7 +8,6 @@ def converter_inteiro(value):
     except (ValueError, TypeError):
         return 0
 
-
 # 1 - Abrir a conexão
 connection = psycopg2.connect(
     host="localhost",
@@ -17,6 +16,7 @@ connection = psycopg2.connect(
     user="postgres",
     password="1234"
 )
+
 cursor = connection.cursor()
 
 sql_path = os.path.join(os.path.dirname(__file__), '..', 'schemas', 'institutos.sql')
