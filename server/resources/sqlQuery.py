@@ -11,8 +11,8 @@ def consulta_por_estado(ano):
         ).filter(InstituicaoEnsino.ano == ano).group_by(InstituicaoEnsino.sg_uf).all()
 
         return jsonify([
-            {"sg_uf": row.sg_uf, "mat_bas": row.mat_bas}
-            for row in result
+            dict(sg_uf=sg_uf, mat_bas=int(mat_bas))
+            for sg_uf, mat_bas in result
         ]), 200
 
     except Exception as e:

@@ -73,7 +73,7 @@ const MapaEstados = ({ sigla, ano }) => {
   }, [sigla]);
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:5000/dados/municipios${ano}`)
+    fetch(`http://127.0.0.1:5000/dados/municipios${ano}?uf=${sigla}`)
       .then((res) => res.json())
       .then((data) => {
         const filtrado = data.filter((item) => item.sg_uf === sigla);
