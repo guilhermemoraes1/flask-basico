@@ -72,3 +72,38 @@ def dados_por_municipio_2023():
 def dados_por_municipio_2024():
     uf = request.args.get("uf")
     return consulta_por_municipio(2024, uf)
+
+@app.get("/dados/microrregioes")
+def dados_microrregioes():
+    try:
+
+        microrregioes = db.session.query(
+            InstituicaoEnsino.no_microrregiao
+        ).distinct().order_by(
+            InstituicaoEnsino.no_microrregiao
+        ).all()
+        
+        lista_microrregioes = [row[0] for row in microrregioes]
+        
+        return jsonify(lista_microrregioes)
+    except Exception as e:
+        logger.error(f"Erro ao buscar microrregiões: {e}")
+        return jsonify({"mensagem": f"Erro ao acessar os dados: {str(e)}"}), 500
+
+@app.get("/dados/mesorregioes")
+def dados_mesorregioes():
+    try:
+
+        mesorregioes = db.session.query(
+            InstituicaoEnsino.no_mesorregiao
+        ).distinct().order_by(
+            InstituicaoEnsino.no_mesorregiao
+        ).all()
+        
+        lista_mesorregioes = [row[0] for row in mesorregioes]
+        
+        return jsonify(lista_mesorregioes)
+    except Exception as e:
+        logger.error(f"Erro ao buscar microrregiões: {e}")
+        return jsonify({"mensagem": f"Erro ao acessar os dados: {str(e)}"}), 500
+
