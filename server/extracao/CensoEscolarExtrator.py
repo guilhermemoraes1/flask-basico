@@ -19,13 +19,7 @@ connection = psycopg2.connect(
 
 cursor = connection.cursor()
 
-sql_path = os.path.join(os.path.dirname(__file__), '..', 'schemas', 'institutos.sql')
-
-with open(sql_path, encoding='utf-8') as f:
-    cursor.execute(f.read())
-connection.commit()
-
-csv_path = os.path.join(os.path.dirname(__file__), '..', '..', 'dados_ed_2023.csv')
+csv_path = os.path.join(os.path.dirname(__file__), '..', '..', 'dados_ed_2024.csv')
 
 with open(csv_path, newline='', encoding='ISO-8859-1') as csvfile:
     reader = csv.DictReader(csvfile)
@@ -66,7 +60,7 @@ with open(csv_path, newline='', encoding='ISO-8859-1') as csvfile:
                 converter_inteiro(row['QT_MAT_MED']),
                 converter_inteiro(row['QT_MAT_EJA']),
                 converter_inteiro(row['QT_MAT_ESP']),
-                2023
+                2024
             )
             batch.append(valores)
 

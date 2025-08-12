@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS tb_instituicao;
+
 
 CREATE TABLE IF NOT EXISTS tb_instituicao (
     id SERIAL PRIMARY KEY,

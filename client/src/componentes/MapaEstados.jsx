@@ -39,6 +39,7 @@ const stateViewConfig = {
 const MapaEstados = ({ sigla, ano }) => {
   const [geoData, setGeoData] = useState(null);
   const [dadosMunicipios, setDadosMunicipios] = useState({});
+  const [tooltip, setTooltip] = useState("");
 
   const getColor = (valor) => {
     if (!valor) return "#e0e0e0";
@@ -94,6 +95,7 @@ const MapaEstados = ({ sigla, ano }) => {
   const config = stateViewConfig[sigla] || { center: [-55, -15], scale: 2000 };
 
   return (
+    <>
     <ComposableMap
       projection="geoMercator"
       projectionConfig={{
@@ -109,12 +111,21 @@ const MapaEstados = ({ sigla, ano }) => {
             geographies.map((geo) => {
               const codigoMun = parseInt(geo.properties.GEOCODIGO, 10);
               const valor = dadosMunicipios[codigoMun];
-              console.log("Código:", codigoMun, "Valor:", valor);
 
               return (
                 <Geography
                   key={geo.rsmKey || codigoMun}
                   geography={geo}
+                  onMouseEnter={() => {
+                  setTooltip(
+                      valor
+                      ? `${geo.properties.NOME}: ${valor.toLocaleString()} matrículas`
+                      : `${geo.properties.NOME}: sem dados`
+                  );
+                  }}
+                  onMouseLeave={() => {
+                  setTooltip("");
+                  }}
                   style={{
                     default: {
                       fill: getColor(valor),
@@ -141,8 +152,11 @@ const MapaEstados = ({ sigla, ano }) => {
         </Geographies>
       </ZoomableGroup>
     </ComposableMap>
+    <div style={{ marginTop: 20, fontSize: "1.2rem", fontWeight: "bold" }}>
+      {tooltip}
+    </div>
+    </>
   );
 };
 
 export default MapaEstados;
-

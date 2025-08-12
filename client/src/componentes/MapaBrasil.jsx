@@ -6,36 +6,33 @@ import {
   Geography,
   ZoomableGroup,
 } from "react-simple-maps";
-import MapaEstados from "./MapaEstados"; // ou o caminho correto
+import MapaEstados from "./MapaEstados";
 
-// URL do GeoJSON do mapa do Brasil
 const geoUrl =
   "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson";
 
 const MapaBrasil = () => {
   const getColor = (valor) => {
-    if (!valor) return "#e0e0e0"; // sem dados
-    if (valor > 10_000_000) return "#0d47a1";      // SP
-    if (valor > 5_500_000)  return "#1565c0";      // RJ e MG
-    if (valor > 3_000_000)  return "#1976d2";      // BA, PR
-    if (valor > 2_000_000)  return "#1e88e5";      // RS, PA, CE, PE
-    if (valor > 1_500_000)  return "#42a5f5";      // GO, AM
-    if (valor > 1_000_000)  return "#64b5f6";      // MA, SC
-    if (valor > 850_000)    return "#81d4fa";      // ES, AL, MT
-    if (valor > 700_000)    return "#90caf9";      // PB, DF
-    if (valor > 500_000)    return "#bbdefb";      // PI, MS, RN, SE
-    if (valor > 250_000)    return "#d0eaff";      // AC, RO
-    return "#e3f2fd";                              // TO, AP, RR
+    if (!valor) return "#e0e0e0"; 
+    if (valor > 10_000_000) return "#0d47a1";   
+    if (valor > 5_500_000)  return "#1565c0";      
+    if (valor > 3_000_000)  return "#1976d2";      
+    if (valor > 2_000_000)  return "#1e88e5";      
+    if (valor > 1_500_000)  return "#42a5f5";      
+    if (valor > 1_000_000)  return "#64b5f6";      
+    if (valor > 850_000)    return "#81d4fa";      
+    if (valor > 700_000)    return "#90caf9";      
+    if (valor > 500_000)    return "#bbdefb";      
+    if (valor > 250_000)    return "#d0eaff";      
+    return "#e3f2fd";                              
   };
-
 
   const [dados, setDados] = useState({});
   const [tooltip, setTooltip] = useState("");
-  const [ano, setAno] = useState("2023"); // estado para controlar o ano selecionado
+  const [ano, setAno] = useState("2023");
   const [estadoSelecionado, setEstadoSelecionado] = useState("");
 
   useEffect(() => {
-    // Atualiza a API conforme o ano selecionado
     axios
       .get(`http://127.0.0.1:5000/dados/estados${ano}`)
       .then((response) => {
@@ -49,7 +46,7 @@ const MapaBrasil = () => {
         console.error("Erro ao buscar dados dos estados:", error);
         setDados({});
       });
-  }, [ano]); // reexecuta quando o ano mudar
+  }, [ano]);
 
   return (
     <div>
@@ -175,14 +172,6 @@ const MapaBrasil = () => {
         <MapaEstados sigla={estadoSelecionado} ano={ano} />
         )}
 
-
-
-      
-      <div
-        style={{ marginTop: 20, fontSize: "1.2rem", fontWeight: "bold" }}
-      >
-        {tooltip}
-      </div>
     </div>
   );
 };
